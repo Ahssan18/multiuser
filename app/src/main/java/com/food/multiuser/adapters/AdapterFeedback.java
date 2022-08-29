@@ -36,6 +36,7 @@ public class AdapterFeedback extends RecyclerView.Adapter<AdapterFeedback.Custom
     private void setData(FeedBack feedback, CustomFeedback holder) {
         holder.ratingBar.setRating(feedback.getRating());
         holder.feedbackMsg.setText(feedback.getMessage());
+        holder.tv_name.setText(feedback.getUserName());
     }
 
     @Override
@@ -46,11 +47,12 @@ public class AdapterFeedback extends RecyclerView.Adapter<AdapterFeedback.Custom
     protected class CustomFeedback extends RecyclerView.ViewHolder {
 
         private RatingBar ratingBar;
-        private TextView feedbackMsg;
+        private TextView feedbackMsg, tv_name;
 
         public CustomFeedback(@NonNull View itemView) {
             super(itemView);
             ratingBar = itemView.findViewById(R.id.ratingBar);
+            tv_name = itemView.findViewById(R.id.tv_name);
             feedbackMsg = itemView.findViewById(R.id.tv_feedback);
         }
     }

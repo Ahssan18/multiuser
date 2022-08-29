@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.food.multiuser.Helper;
 import com.food.multiuser.Model.FeedBack;
 import com.food.multiuser.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -26,6 +27,7 @@ public class FeedBackActivity extends AppCompatActivity {
     private DatabaseReference feedbackReference;
     private String productId, name;
     private TextView tvTitle;
+    private Helper helper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,8 @@ public class FeedBackActivity extends AppCompatActivity {
             public void onClick(View view) {
                 FeedBack feedBack = new FeedBack();
                 feedBack.setRating(ratingBar.getRating());
+                feedBack.setUserId(helper.getUser().getUid());
+                feedBack.setUserName(helper.getUser().getName());
                 String message = etMessage.getText().toString();
                 if (!message.equals("")) {
                     feedBack.setMessage(etMessage.getText().toString());
@@ -60,6 +64,7 @@ public class FeedBackActivity extends AppCompatActivity {
     }
 
     private void initObject() {
+        helper = new Helper(this);
         ratingBar = findViewById(R.id.ratingBar);
         tvTitle = findViewById(R.id.tv_title);
         etMessage = findViewById(R.id.et_feedback_msg);
