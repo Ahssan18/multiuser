@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -56,20 +56,18 @@ public class ProductList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_list);
-        //init firebase
         helper = new Helper(this);
         firebaseDatabase = FirebaseDatabase.getInstance();
         productlist = firebaseDatabase.getReference("Products");
         firebaseStorage = FirebaseStorage.getInstance();
         storageReference = firebaseStorage.getReference();
-        //init recyclerview
-        recyclerView_product = (RecyclerView) findViewById(R.id.recyclerview_product);
+        recyclerView_product = findViewById(R.id.recyclerview_product);
         recyclerView_product.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(this);
+        layoutManager = new GridLayoutManager(this, 2);
         recyclerView_product.setLayoutManager(layoutManager);
-        productlayout = (ConstraintLayout) findViewById(R.id.productlayout);
+        productlayout = findViewById(R.id.productlayout);
 
-        floatingActionButton = (FloatingActionButton) findViewById(R.id.floatingActionButton);
+        floatingActionButton = findViewById(R.id.floatingActionButton);
         if (helper.getUser().getUsertype() == 1) {
             floatingActionButton.setVisibility(View.GONE);
         } else {
@@ -96,7 +94,7 @@ public class ProductList extends AppCompatActivity {
             protected void populateViewHolder(ProductViewHolder viewHolder, Product model, int position) {
                 viewHolder.product_name.setText(model.getName());
                 Picasso.with(getBaseContext())
-                        .load(model.getImage())
+                        .load(model.getBarcode())
                         .into(viewHolder.product_image);
 
                 viewHolder.setItemClickListener(new ItemClickListener() {

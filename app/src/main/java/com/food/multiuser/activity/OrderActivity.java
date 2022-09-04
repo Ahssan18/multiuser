@@ -2,6 +2,7 @@ package com.food.multiuser.activity;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -28,6 +29,7 @@ public class OrderActivity extends AppCompatActivity {
     private DatabaseReference orderReference;
     private List<Order> orderList;
     private AdapterOrders adapterOrders;
+    private String TAG = "OrderActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +51,15 @@ public class OrderActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                snapshot.getChildren().iterator().forEachRemaining(new Consumer<DataSnapshot>() {
-                    @Override
-                    public void accept(DataSnapshot dataSnapshot) {
-                        orderList.add(dataSnapshot.getValue(Order.class));
-                    }
-                });
+                if (snapshot.exists() && snapshot.hasChildren()) {
+                    snapshot.getChildren().iterator().forEachRemaining(new Consumer<DataSnapshot>() {
+                        @Override
+                        public void accept(DataSnapshot dataSnapshot) {
+                            orderList.add(dataSnapshot.getValue(Order.class));
+                        }
+                    });
+                    Log.e(TAG, "orderList " + orderList.toString());
+                }
                 setAdapter();
             }
 

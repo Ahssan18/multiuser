@@ -16,18 +16,6 @@ public class Order {
     public Order() {
     }
 
-    @Override
-    public String toString() {
-        return "Order{" +
-                "acceptStatus=" + acceptStatus +
-                ", deliverStatus=" + deliverStatus +
-                ", userId='" + userId + '\'' +
-                ", name='" + name + '\'' +
-                ", price='" + price + '\'' +
-                ", description='" + description + '\'' +
-                '}';
-    }
-
     public boolean isAcceptStatus() {
         return acceptStatus;
     }
@@ -90,5 +78,19 @@ public class Order {
 
     public void setProductId(String productId) {
         this.productId = productId;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "acceptStatus=" + acceptStatus +
+                ", deliverStatus=" + deliverStatus +
+                ", userId='" + userId + '\'' +
+                ", name='" + name + '\'' +
+                ", price='" + price + '\'' +
+                ", description='" + description + '\'' +
+                ", orderId='" + orderId + '\'' +
+                ", productId='" + productId + '\'' +
+                '}';
     }
 }

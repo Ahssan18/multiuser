@@ -2,7 +2,6 @@ package com.food.multiuser.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,27 +47,31 @@ public class AdapterOrders extends RecyclerView.Adapter<AdapterOrders.CustomOrde
 
     @Override
     public void onBindViewHolder(@NonNull CustomOrder holder, int position) {
-        setData(orderList.get(position), holder);
+        if (orderList.get(position) != null)
+            setData(orderList.get(position), holder);
     }
 
     private void setData(Order order, CustomOrder holder) {
-        holder.title.setText(order.getName());
-        holder.description.setText(order.getDescription());
-        holder.price.setText(order.getPrice());
+        if (order.getName() != null)
+            holder.title.setText(order.getName());
+        if (order.getDescription() != null)
+            holder.description.setText(order.getDescription());
+        if (order.getPrice() != null)
+            holder.price.setText(order.getPrice());
         if (order.isAcceptStatus()) {
             holder.btnAccept.setClickable(false);
             holder.btnAccept.setBackgroundColor(Color.GRAY);
         }
-        Log.e(TAG,"userId "+order.getUserId());
-        userRef.child(order.getUserId()).child("UserDetails").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                User user = snapshot.getValue(User.class);
-                holder.orderBy.setText("Order by : " + user.getName());
-            }
+        if (order.getUserId() != null)
+            userRef.child(order.getUserId()).child("UserDetails").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    User user = snapshot.getValue(User.class);
+                    holder.orderBy.setText("Order by : " + user.getName());
+                }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
             }
         });

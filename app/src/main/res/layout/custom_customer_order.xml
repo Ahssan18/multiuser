@@ -38,21 +38,40 @@
         android:textColor="@color/black"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+    <Button
+        android:id="@+id/btn_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="Cancel"
+        android:textSize="10sp"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_receipt"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/receipt"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_cancel"
+        tools:layout_editor_absoluteY="5dp" />
 
     <TextView
         android:id="@+id/tv_description"
         android:layout_width="79dp"
         android:layout_height="23dp"
-        android:layout_marginTop="20sp"
         android:ellipsize="end"
         android:hint="description :"
         android:textColor="@color/black"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_unit_price" />
 
     <Button
         android:id="@+id/btnReceived"
@@ -61,7 +80,6 @@
         android:text="Received"
         android:textAllCaps="false"
         android:textSize="10sp"
-        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

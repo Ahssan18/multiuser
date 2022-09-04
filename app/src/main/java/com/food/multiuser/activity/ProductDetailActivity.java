@@ -1,8 +1,19 @@
 package com.food.multiuser.activity;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -19,7 +30,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -31,6 +45,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     private Product product;
     private DatabaseReference feedbackRef;
     private List<FeedBack> feedBackList;
+    private ImageView productQr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +54,56 @@ public class ProductDetailActivity extends AppCompatActivity {
         initObjects();
         clickListener();
         getProdectFeedback();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.more_tab_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.download_qr) {
+            SaveImage(((BitmapDrawable) productQr.getDrawable()).getBitmap());
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+    private void SaveImage(Bitmap finalBitmap) {
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/Almadina_Bakers");
+        myDir.mkdirs();
+        String fname = "Image-"+product.getName()+"-" + product.getProductId() + ".jpg";
+        File file = new File(myDir, fname);
+        if (file.exists())
+            file.delete();
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+            MediaScannerConnection.scanFile(this,
+                    new String[]{file.toString()}, null,
+                    new MediaScannerConnection.OnScanCompletedListener() {
+                        public void onScanCompleted(String path, Uri uri) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(ProductDetailActivity.this, "Product Qr is saved successfully!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            Log.i("ExternalStorage", "Scanned " + path + ":");
+                            Log.i("ExternalStorage", "-> uri=" + uri);
+                        }
+                    });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void getProdectFeedback() {
@@ -82,11 +147,15 @@ public class ProductDetailActivity extends AppCompatActivity {
         feedbackRef = FirebaseDatabase.getInstance().getReference("feedback");
         product = getIntent().getParcelableExtra("post");
         title = findViewById(R.id.tv_title);
+        productQr = findViewById(R.id.product_image);
         description = findViewById(R.id.tv_description);
         recycleFeedback = findViewById(R.id.recycle_feedback);
         if (product != null) {
             title.setText(product.getName());
             description.setText(product.getDiscription());
+            Picasso.with(getBaseContext())
+                    .load(product.getBarcode())
+                    .into(productQr);
         }
 
 
