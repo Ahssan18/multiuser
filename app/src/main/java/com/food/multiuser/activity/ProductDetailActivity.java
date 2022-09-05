@@ -1,5 +1,7 @@
 package com.food.multiuser.activity;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaScannerConnection;
@@ -7,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,7 +36,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -75,20 +80,45 @@ public class ProductDetailActivity extends AppCompatActivity {
 
 
     private void SaveImage(Bitmap finalBitmap) {
-        String root = Environment.getExternalStorageDirectory().toString();
-        File myDir = new File(root + "/Almadina_Bakers");
-        myDir.mkdirs();
-        String fname = "Image-"+product.getName()+"-" + product.getProductId() + ".jpg";
-        File file = new File(myDir, fname);
-        if (file.exists())
-            file.delete();
+        File myDir;
+        String path = null;
+        OutputStream out = null;
+        if (android.os.Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            ContentResolver resolver = this.getContentResolver();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "Image-" + product.getName() + "-" + product.getProductId());
+            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/png");
+            contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/" + "Almadina_Bakers");
+            Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+            try {
+                path = imageUri.getPath();
+                out = resolver.openOutputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        } else {
+            String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString();
+            myDir = new File(root + "/Almadina_Bakers");
+            myDir.mkdirs();
+            String fname = "Image-" + product.getName() + "-" + product.getProductId() + ".jpg";
+            File file = new File(myDir, fname);
+            if (file.exists())
+                file.delete();
+            try {
+                path = file.getPath();
+                out = new FileOutputStream(file);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
         try {
-            FileOutputStream out = new FileOutputStream(file);
             finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
             out.flush();
             out.close();
             MediaScannerConnection.scanFile(this,
-                    new String[]{file.toString()}, null,
+                    new String[]{path}, null,
                     new MediaScannerConnection.OnScanCompletedListener() {
                         public void onScanCompleted(String path, Uri uri) {
                             runOnUiThread(new Runnable() {

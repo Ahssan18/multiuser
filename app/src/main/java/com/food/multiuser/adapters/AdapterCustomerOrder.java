@@ -4,6 +4,8 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,7 +16,12 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.pdf.PdfDocument;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.os.Looper;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,9 +44,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 public class AdapterCustomerOrder extends RecyclerView.Adapter<AdapterCustomerOrder.CustomOrder> {
@@ -50,6 +60,7 @@ public class AdapterCustomerOrder extends RecyclerView.Adapter<AdapterCustomerOr
     int pageHeight = 1120;
     int pagewidth = 792;
     Bitmap bmp, scaledbmp;
+    private String TAG = "AdapterCustomerOrder";
 
 
     public AdapterCustomerOrder(List<Order> orderList, Context context) {
@@ -172,15 +183,35 @@ public class AdapterCustomerOrder extends RecyclerView.Adapter<AdapterCustomerOr
         canvas.drawText("Total Amount", 10, 1050, title);
         canvas.drawText(order.getPrice() + " RS", 600, 1050, title);
         pdfDocument.finishPage(myPage);
-        File file = new File(Environment.getExternalStorageDirectory(), order.getOrderId() + ".pdf");
+        if (android.os.Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            String root = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString();
+            File file = new File(root, order.getName() + "-" + order.getOrderId() + ".pdf");
+            writeFileToDownloads(file, pdfDocument);
+        } else {
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), order.getOrderId() + ".pdf");
+            try {
+                pdfDocument.writeTo(new FileOutputStream(file));
+                Log.e(TAG, "generatePDF => " + file.getPath());
+                Toast.makeText(context, "Receipt generated successfully.", Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                Log.e(TAG, "generatePDF => " + e.getMessage());
+                e.printStackTrace();
+            }
+            pdfDocument.close();
+        }
+    }
+
+    private void writeFileToDownloads(File file, PdfDocument pdfDocument) {
         try {
             pdfDocument.writeTo(new FileOutputStream(file));
+            Looper.getMainLooper();
             Toast.makeText(context, "Receipt generated successfully.", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        pdfDocument.close();
-    }
+
+
+            }
 
     @Override
     public int getItemCount() {
