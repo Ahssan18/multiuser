@@ -1,16 +1,18 @@
 package com.food.multiuser.Model;
 
+import java.util.List;
+
 public class Order {
     boolean acceptStatus, deliverStatus;
-    String userId, name, price, description, orderId, productId;
+    String userId, TotalPrice, orderId;
+    List<Product> productList;
 
-    public Order(boolean acceptStatus, boolean deliverStatus, String userId, String name, String price, String description) {
+    public Order(boolean acceptStatus, boolean deliverStatus, String userId, String price, List<Product> productList) {
         this.acceptStatus = acceptStatus;
         this.deliverStatus = deliverStatus;
         this.userId = userId;
-        this.name = name;
-        this.price = price;
-        this.description = description;
+        this.TotalPrice = price;
+        this.productList = productList;
     }
 
     public Order() {
@@ -40,29 +42,14 @@ public class Order {
         this.userId = userId;
     }
 
-    public String getName() {
-        return name;
+    public String getTotalPrice() {
+        return TotalPrice;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTotalPrice(String totalPrice) {
+        this.TotalPrice = totalPrice;
     }
 
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
     public String getOrderId() {
         return orderId;
@@ -72,25 +59,22 @@ public class Order {
         this.orderId = orderId;
     }
 
-    public String getProductId() {
-        return productId;
-    }
-
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
-
     @Override
     public String toString() {
         return "Order{" +
                 "acceptStatus=" + acceptStatus +
                 ", deliverStatus=" + deliverStatus +
                 ", userId='" + userId + '\'' +
-                ", name='" + name + '\'' +
-                ", price='" + price + '\'' +
-                ", description='" + description + '\'' +
+                ", price='" + TotalPrice + '\'' +
                 ", orderId='" + orderId + '\'' +
-                ", productId='" + productId + '\'' +
                 '}';
+    }
+
+    public List<Product> getProductList() {
+        return productList;
+    }
+
+    public void setProductList(List<Product> productList) {
+        this.productList = productList;
     }
 }

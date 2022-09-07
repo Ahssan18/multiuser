@@ -19,13 +19,16 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class FeedBackActivity extends AppCompatActivity {
 
     private RatingBar ratingBar;
     private EditText etMessage;
     private Button btnSubmit;
-    private DatabaseReference feedbackReference;
-    private String productId, name;
+    private DatabaseReference feedbackReference, orderRef;
+    private String productId, name, productKey, orderId;
     private TextView tvTitle;
     private Helper helper;
 
@@ -53,6 +56,12 @@ public class FeedBackActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
+                                if (orderId != null && orderRef != null) {
+                                    Map<String, Object> map = new HashMap<String, Object>();
+                                    map.put("feedback", true);
+                                    orderRef.child(orderId).child("productList").child(productKey)
+                                            .updateChildren(map);
+                                }
                                 Toast.makeText(FeedBackActivity.this, "Feedback submitted successfully!", Toast.LENGTH_SHORT).show();
                                 finish();
                             }
@@ -71,8 +80,11 @@ public class FeedBackActivity extends AppCompatActivity {
         btnSubmit = findViewById(R.id.btn_submit_feedback);
         productId = getIntent().getStringExtra("productId");
         name = getIntent().getStringExtra("name");
+        productKey = getIntent().getStringExtra("productkey");
+        orderId = getIntent().getStringExtra("orderId");
         tvTitle.setText("Feedback about " + name);
         feedbackReference = FirebaseDatabase.getInstance().getReference("feedback");
+        orderRef = FirebaseDatabase.getInstance().getReference("order");
 
     }
 }

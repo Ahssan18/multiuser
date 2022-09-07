@@ -1,86 +1,51 @@
 package com.food.multiuser.Model;
 
-import com.google.gson.annotations.SerializedName;
+import java.util.List;
 
 public class CartItem {
-    @SerializedName("barcode")
-    private String barcode;
-    @SerializedName("discription")
+    private String cartId;
+    private String totalPrice;
+    private List<Product> list;
 
-    private String discription;
-    @SerializedName("name")
-
-    private String name;
-    @SerializedName("price")
-
-    private String price;
-    @SerializedName("productId")
-
-    private String productId;
-    @SerializedName("quantity")
-
-    private String quantity;
+    public CartItem(String cartId, String totalPrice, List<Product> list) {
+        this.cartId = cartId;
+        this.totalPrice = totalPrice;
+        this.list = list;
+    }
 
     public CartItem() {
     }
 
-    public String getBarcode() {
-        return barcode;
+    public String getCartId() {
+        return cartId;
     }
 
-    public void setBarcode(String barcode) {
-        this.barcode = barcode;
+    public void setCartId(String cartId) {
+        this.cartId = cartId;
     }
 
-    public String getDiscription() {
-        return discription;
+    public List<Product> getList() {
+        return list;
     }
 
-    public void setDiscription(String discription) {
-        this.discription = discription;
+    public void setList(List<Product> list) {
+        this.list = list;
     }
 
-    public String getName() {
-        return name;
+    public String getTotalPrice() {
+        return totalPrice;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public String getProductId() {
-        return productId;
-    }
-
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
-
-    public String getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(String quantity) {
-        this.quantity = quantity;
+    public void setTotalPrice(String totalPrice) {
+        this.totalPrice = totalPrice;
     }
 
     @Override
     public String toString() {
         return "CartItem{" +
-                "barcode='" + barcode + '\'' +
-                ", discription='" + discription + '\'' +
-                ", name='" + name + '\'' +
-                ", price='" + price + '\'' +
-                ", productId='" + productId + '\'' +
-                ", quantity='" + quantity + '\'' +
+                "cartId='" + cartId + '\'' +
+                ", totalPrice='" + totalPrice + '\'' +
+                ", list=" + list +
                 '}';
     }
 }

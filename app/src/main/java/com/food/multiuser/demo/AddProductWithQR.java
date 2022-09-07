@@ -15,8 +15,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.food.multiuser.Model.Product;
-import com.food.multiuser.activity.ProductList;
 import com.food.multiuser.R;
+import com.food.multiuser.activity.ProductList;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
@@ -125,12 +125,9 @@ public class AddProductWithQR extends AppCompatActivity {
                 //read values
                 String title = editTitle.getText().toString();
                 String description = editDesc.getText().toString();
-                String qty = editQty.getText().toString();
-                String price = editPrice.getText().toString();
-
-//                set values to
+                int qty = Integer.parseInt(editQty.getText().toString());
+                int price = Integer.parseInt(editPrice.getText().toString());
                 Product product = new Product();
-
                 product.setProductId(strProductKey);
                 product.setName(title);
                 product.setQuantity(qty);

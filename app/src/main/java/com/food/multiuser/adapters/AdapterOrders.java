@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.food.multiuser.Model.Order;
@@ -52,12 +53,9 @@ public class AdapterOrders extends RecyclerView.Adapter<AdapterOrders.CustomOrde
     }
 
     private void setData(Order order, CustomOrder holder) {
-        if (order.getName() != null)
-            holder.title.setText(order.getName());
-        if (order.getDescription() != null)
-            holder.description.setText(order.getDescription());
-        if (order.getPrice() != null)
-            holder.price.setText(order.getPrice());
+        setRecycle(holder, order);
+        if (order.getTotalPrice() != null)
+            holder.price.setText(order.getTotalPrice());
         if (order.isAcceptStatus()) {
             holder.btnAccept.setClickable(false);
             holder.btnAccept.setBackgroundColor(Color.GRAY);
@@ -92,6 +90,12 @@ public class AdapterOrders extends RecyclerView.Adapter<AdapterOrders.CustomOrde
         });
     }
 
+    private void setRecycle(CustomOrder holder, Order order) {
+        holder.recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        AdapterCart adapterCart = new AdapterCart(context, order);
+        holder.recyclerView.setAdapter(adapterCart);
+    }
+
     @Override
     public int getItemCount() {
         return orderList.size();
@@ -99,14 +103,14 @@ public class AdapterOrders extends RecyclerView.Adapter<AdapterOrders.CustomOrde
 
     public class CustomOrder extends RecyclerView.ViewHolder {
 
-        private TextView title, description, price, orderBy;
+        private TextView price, orderBy;
         private Button btnAccept;
+        private RecyclerView recyclerView;
 
         public CustomOrder(@NonNull View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.tv_title);
+            recyclerView = itemView.findViewById(R.id.recycle_products);
             orderBy = itemView.findViewById(R.id.tv_order_by);
-            description = itemView.findViewById(R.id.tv_description);
             price = itemView.findViewById(R.id.tv_unit_price);
             btnAccept = itemView.findViewById(R.id.btnAccept);
         }

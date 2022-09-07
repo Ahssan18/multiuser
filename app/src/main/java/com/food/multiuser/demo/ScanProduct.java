@@ -27,6 +27,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ScanProduct extends AppCompatActivity {
 
     Button btnScanQR;
@@ -35,11 +38,10 @@ public class ScanProduct extends AppCompatActivity {
 
     DatabaseReference reference;
     FirebaseAuth auth;
-
     TextView tvProduct;
     ConstraintLayout scanproductlayout;
-
     CartItem cartItem;
+    private List<Product> productList;
 
     Product product;
 
@@ -48,7 +50,8 @@ public class ScanProduct extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_product);
         setTitle("Scan Product Code");
-
+        cartItem = new CartItem();
+        productList = new ArrayList<>();
         //initialization
         dialog = new ProgressDialog(this);
         dialog.setCancelable(true);
@@ -87,11 +90,7 @@ public class ScanProduct extends AppCompatActivity {
     private final ActivityResultLauncher<ScanOptions> barcodeLauncher =
             registerForActivityResult(new ScanContract(), result -> {
                 if (result.getContents() != null) {
-                    //scan successful : QR Found
                     PRODUCT_ID = result.getContents();
-                    Log.d("TAG", "BarcodeLauncher: QR Code Found: Product Found:: " + PRODUCT_ID);
-
-                    //getting detalss from database
                     getProductDetails(PRODUCT_ID);
 
                 } else {
@@ -137,14 +136,41 @@ public class ScanProduct extends AppCompatActivity {
     private void addProductToCart(Product product) {
         dialog.setTitle("Adding to Cart...");
         dialog.show();
+        int price = 0;
+        boolean found = false;
+        Product existingProduct = null;
+        for (int i = 0; i < productList.size(); i++) {
+            Product product1 = productList.get(i);
+            if (product1.getProductId().equals(product.getProductId())) {
+                found = true;
+                existingProduct = product1;
+            }
+        }
+        if (found) {
+            for (int i = 0; i < productList.size(); i++) {
+                Product product1 = productList.get(i);
+                if (product1.getProductId().equals(product.getProductId())) {
+                    int quanity = existingProduct.getQuantity() + 1;
+                    product1.setQuantity(quanity);
+                    productList.set(i, product1);
+                }
+            }
+        } else {
+            productList.add(product);
+        }
+        for (int i = 0; i < productList.size(); i++) {
+            Product product1 = productList.get(i);
+            price = price + (product1.getPrice() * product1.getQuantity());
+        }
+        cartItem.setTotalPrice(price + "");
+        cartItem.setList(productList);
         reference.child("MyCart").child(auth.getCurrentUser().getUid())
-                .push().setValue(product)
+                .setValue(cartItem)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
                         dialog.dismiss();
                         Toast.makeText(ScanProduct.this, "Product added to your cart!", Toast.LENGTH_SHORT).show();
-                        finish();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override

@@ -4,10 +4,7 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,11 +13,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.pdf.PdfDocument;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Looper;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,23 +28,21 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.food.multiuser.Helper;
 import com.food.multiuser.Model.Order;
+import com.food.multiuser.Model.Product;
 import com.food.multiuser.R;
-import com.food.multiuser.activity.FeedBackActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 
 public class AdapterCustomerOrder extends RecyclerView.Adapter<AdapterCustomerOrder.CustomOrder> {
@@ -86,13 +79,16 @@ public class AdapterCustomerOrder extends RecyclerView.Adapter<AdapterCustomerOr
     }
 
     private void setData(Order order, AdapterCustomerOrder.CustomOrder holder) {
-        holder.title.setText(order.getName());
-        holder.description.setText(order.getDescription());
-        holder.price.setText(order.getPrice());
+        setRecycleView(order, holder);
+        holder.price.setText("Total Price " + order.getTotalPrice());
         holder.orderBy.setText("Order by : " + helper.getUser().getName());
         if (order.isAcceptStatus()) {
             holder.btnReceived.setClickable(true);
+            holder.btn_cancel.setVisibility(View.GONE);
             holder.btnReceived.setVisibility(View.VISIBLE);
+        } else {
+            holder.btn_cancel.setVisibility(View.VISIBLE);
+            holder.btnReceived.setVisibility(View.GONE);
         }
         if (order.isDeliverStatus()) {
             holder.btn_cancel.setVisibility(View.GONE);
@@ -136,12 +132,16 @@ public class AdapterCustomerOrder extends RecyclerView.Adapter<AdapterCustomerOr
                                 holder.btnReceived.setText("Received");
                                 notifyDataSetChanged();
                                 holder.btnReceived.setBackgroundColor(Color.GRAY);
-                                context.startActivity(new Intent(context, FeedBackActivity.class).putExtra("productId", order.getProductId()).putExtra("name", order.getName()));
-
                             }
                         });
             }
         });
+    }
+
+    private void setRecycleView(Order order, CustomOrder holder) {
+        holder.recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        AdapterCart adapterCart = new AdapterCart(context, order);
+        holder.recyclerView.setAdapter(adapterCart);
     }
 
     private boolean checkPermission() {
@@ -173,20 +173,23 @@ public class AdapterCustomerOrder extends RecyclerView.Adapter<AdapterCustomerOr
         canvas.drawText("Customer Name : " + helper.getUser().getName(), 10, 250, title);
         canvas.drawText("-----------------------------------------------------------", 10, 280, title);
         canvas.drawText("Product Name", 10, 330, title);
-        canvas.drawText(order.getName(), 600, 330, title);
-        canvas.drawText("Product Price", 10, 380, title);
-        canvas.drawText(order.getPrice() + " RS", 600, 380, title);
-        canvas.drawText("Product Quantity", 10, 430, title);
-        canvas.drawText("1 unit", 600, 430, title);
-
+        canvas.drawText("Price", 450, 330, title);
+        canvas.drawText("Quantity", 600, 330, title);
+        float name = 380;
+        for (Product product : order.getProductList()) {
+            canvas.drawText(product.getName(), 10, name, title);
+            canvas.drawText(String.valueOf(product.getPrice()), 450, name, title);
+            canvas.drawText(String.valueOf(product.getQuantity()), 600, name, title);
+            name = name + 50;
+        }
         canvas.drawText("-----------------------------------------------------------", 10, 1000, title);
         canvas.drawText("Total Amount", 10, 1050, title);
-        canvas.drawText(order.getPrice() + " RS", 600, 1050, title);
+        canvas.drawText(order.getTotalPrice() + " RS", 600, 1050, title);
         pdfDocument.finishPage(myPage);
         if (android.os.Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
             String root = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString();
-            File file = new File(root, order.getName() + "-" + order.getOrderId() + ".pdf");
-            writeFileToDownloads(file, pdfDocument);
+//            File file = new File(root, order.getName() + "-" + order.getOrderId() + ".pdf");
+//            writeFileToDownloads(file, pdfDocument);
         } else {
             File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), order.getOrderId() + ".pdf");
             try {
@@ -223,16 +226,18 @@ public class AdapterCustomerOrder extends RecyclerView.Adapter<AdapterCustomerOr
         private TextView title, description, price, orderBy;
         private Button btnReceived, btn_cancel;
         private ImageView ivReceipt;
+        private RecyclerView recyclerView;
 
         public CustomOrder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.tv_title);
             orderBy = itemView.findViewById(R.id.tv_order_by);
             description = itemView.findViewById(R.id.tv_description);
-            price = itemView.findViewById(R.id.tv_unit_price);
+            price = itemView.findViewById(R.id.tv_total);
             btnReceived = itemView.findViewById(R.id.btnReceived);
             btn_cancel = itemView.findViewById(R.id.btn_cancel);
             ivReceipt = itemView.findViewById(R.id.iv_receipt);
+            recyclerView = itemView.findViewById(R.id.recycle_order_items);
         }
     }
 }

@@ -48,7 +48,6 @@ public class CustomerOrderActivity extends AppCompatActivity {
     }
 
     private void setData() {
-        DatabaseReference prderRef = FirebaseDatabase.getInstance().getReference().child("order");
         orderReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
@@ -78,7 +77,6 @@ public class CustomerOrderActivity extends AppCompatActivity {
         adapterOrders = new AdapterCustomerOrder(orderList, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapterOrders);
-        adapterOrders.notifyDataSetChanged();
     }
 
 }
