@@ -67,7 +67,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(i);
                 break;
             case R.id.Products:
-                i = new Intent(this, ProductList.class);
+                i = new Intent(this, ProductListActivity.class);
                 startActivity(i);
                 break;
             case R.id.Settings:

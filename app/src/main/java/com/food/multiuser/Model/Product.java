@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Product implements Parcelable {
-    private String productId, Discription, Name, Image, MenuId, Barcode;
+    private String productId, Discription, Name, Image, MenuId, productImage;
     private Integer Quantity = 0, Price = 0;
     private boolean feedback = false;
 
@@ -18,7 +18,7 @@ public class Product implements Parcelable {
         Price = price;
         Quantity = quantity;
         MenuId = menuId;
-        Barcode = barcode;
+        productImage = barcode;
     }
 
 
@@ -30,7 +30,7 @@ public class Product implements Parcelable {
         Price = in.readInt();
         Quantity = in.readInt();
         MenuId = in.readString();
-        Barcode = in.readString();
+        productImage = in.readString();
         feedback = in.readByte() != 0;
     }
 
@@ -102,12 +102,12 @@ public class Product implements Parcelable {
         Quantity = quantity;
     }
 
-    public String getBarcode() {
-        return Barcode;
+    public String getProductImage() {
+        return productImage;
     }
 
-    public void setBarcode(String barcode) {
-        Barcode = barcode;
+    public void setProductImage(String productImage) {
+        this.productImage = productImage;
     }
 
     //debug product values
@@ -121,7 +121,7 @@ public class Product implements Parcelable {
                 ", Price='" + Price + '\'' +
                 ", Quantity='" + Quantity + '\'' +
                 ", MenuId='" + MenuId + '\'' +
-                ", Barcode='" + Barcode + '\'' +
+                ", Barcode='" + productImage + '\'' +
                 '}';
     }
 
@@ -139,7 +139,7 @@ public class Product implements Parcelable {
         parcel.writeInt(Price);
         parcel.writeInt(Quantity);
         parcel.writeString(MenuId);
-        parcel.writeString(Barcode);
+        parcel.writeString(productImage);
         parcel.writeByte((byte) (feedback ? 1 : 0));
     }
 

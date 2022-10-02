@@ -56,11 +56,11 @@
             android:name="com.food.multiuser.demo.FetchProductDataFromDb"
             android:exported="false" />
         <activity android:name=".activity.RegisterActivity" />
-        <activity android:name=".activity.ProductList" />
+        <activity android:name=".activity.ProductListActivity" />
         <activity android:name=".activity.ReportsActivity" />
         <activity android:name=".activity.SettingsActivity" />
         <activity android:name=".activity.SupplierActivity" />
-        <activity android:name=".activity.OrdersActivity" />
+        <activity android:name=".activity.PlaceOrdersActivity" />
         <activity android:name=".activity.StaffActivity" />
         <activity android:name=".activity.LoginActivity" />
         <activity android:name=".activity.HomeActivity" />

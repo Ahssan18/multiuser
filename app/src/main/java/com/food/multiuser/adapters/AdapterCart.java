@@ -41,19 +41,22 @@ public class AdapterCart extends RecyclerView.Adapter<AdapterCart.CartView> {
 
     @Override
     public void onBindViewHolder(@NonNull CartView holder, int position) {
-        setData(order.getProductList().get(position), holder, position, order.getOrderId());
+        setData(order.getProductList().get(position), holder, position, order);
     }
 
-    private void setData(Product cartItem, CartView holder, int position, String orderId) {
+    private void setData(Product cartItem, CartView holder, int position, Order order) {
         if (acceptStatus && !cartItem.isFeedback() && userType == 1) {
             holder.btnFeedback.setVisibility(View.VISIBLE);
         } else {
             holder.btnFeedback.setVisibility(View.GONE);
         }
-        holder.title.setText(cartItem.getName());
-        holder.description.setText(cartItem.getDiscription());
-        holder.perUnitPrice.setText("Unit Price :" + cartItem.getPrice());
-        holder.quantity.setText(cartItem.getQuantity() + "");
+        holder.title.setText("Product Title : " + cartItem.getName());
+        holder.description.setText("Product Details : " + cartItem.getDiscription());
+        holder.perUnitPrice.setText("Unit Price : " + cartItem.getPrice());
+        holder.quantity.setText("Product Quantity : " + cartItem.getQuantity() + "");
+        if (order.getTimeStamp() != -1) {
+            holder.tv_orderData.setText(helper.getDate(order.getTimeStamp()));
+        }
 
         holder.btnFeedback.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,7 +65,7 @@ public class AdapterCart extends RecyclerView.Adapter<AdapterCart.CartView> {
                 intent.putExtra("productId", cartItem.getProductId());
                 intent.putExtra("name", cartItem.getName());
                 intent.putExtra("productkey", String.valueOf(position));
-                intent.putExtra("orderId", orderId);
+                intent.putExtra("orderId", order.getOrderId());
                 context.startActivity(intent);
             }
         });
@@ -75,12 +78,13 @@ public class AdapterCart extends RecyclerView.Adapter<AdapterCart.CartView> {
 
     public class CartView extends RecyclerView.ViewHolder {
 
-        private TextView title, description, perUnitPrice, quantity;
+        private TextView title, description, perUnitPrice, quantity, tv_orderData;
         private Button btnFeedback;
 
         public CartView(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.tv_title);
+            tv_orderData = itemView.findViewById(R.id.tv_order_date);
             quantity = itemView.findViewById(R.id.tv_unit_quantity);
             description = itemView.findViewById(R.id.tv_description);
             perUnitPrice = itemView.findViewById(R.id.tv_unit_price);

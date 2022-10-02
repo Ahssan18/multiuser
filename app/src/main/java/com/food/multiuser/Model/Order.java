@@ -7,6 +7,25 @@ public class Order {
     String userId, TotalPrice, orderId;
     List<Product> productList;
 
+    public Order(boolean acceptStatus, boolean deliverStatus, String userId, String orderId, List<Product> productList, long timeStamp) {
+        this.acceptStatus = acceptStatus;
+        this.deliverStatus = deliverStatus;
+        this.userId = userId;
+        this.orderId = orderId;
+        this.productList = productList;
+        this.timeStamp = timeStamp;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
+    long timeStamp = -1;
+
     public Order(boolean acceptStatus, boolean deliverStatus, String userId, String price, List<Product> productList) {
         this.acceptStatus = acceptStatus;
         this.deliverStatus = deliverStatus;

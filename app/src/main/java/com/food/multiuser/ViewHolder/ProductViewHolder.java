@@ -14,14 +14,16 @@ import com.food.multiuser.R;
 public class ProductViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
         View.OnCreateContextMenuListener {
     public ImageView product_image;
-    public TextView product_name;
+    public TextView product_name, tvEdit;
 
     private ItemClickListener itemClickListener;
-    public ProductViewHolder(View itemView){
+
+    public ProductViewHolder(View itemView) {
         super(itemView);
 
         product_name = itemView.findViewById(R.id.product_name);
         product_image = itemView.findViewById(R.id.product_image);
+        tvEdit = itemView.findViewById(R.id.tv_edit);
 
         itemView.setOnCreateContextMenuListener(this);
         itemView.setOnClickListener(this);

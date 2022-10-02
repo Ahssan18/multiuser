@@ -1,5 +1,6 @@
 package com.food.multiuser;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -36,5 +37,11 @@ public class Helper {
         } else {
             return null;
         }
+    }
+    @SuppressLint("SimpleDateFormat")
+    public String getDate(long timeStamp)
+    {
+        return new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").
+                format(new java.util.Date(timeStamp));
     }
 }

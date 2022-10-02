@@ -33,6 +33,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -50,7 +55,8 @@ public class ProductDetailActivity extends AppCompatActivity {
     private Product product;
     private DatabaseReference feedbackRef;
     private List<FeedBack> feedBackList;
-    private ImageView productQr;
+    private ImageView productQr, iv_qr;
+    private Bitmap bitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +77,11 @@ public class ProductDetailActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.download_qr) {
-            SaveImage(((BitmapDrawable) productQr.getDrawable()).getBitmap());
+            try {
+                SaveImage(((BitmapDrawable) iv_qr.getDrawable()).getBitmap());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return true;
         } else {
             return super.onOptionsItemSelected(item);
@@ -137,7 +147,6 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void getProdectFeedback() {
-
         feedbackRef.child(product.getProductId()).addValueEventListener(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
@@ -178,14 +187,25 @@ public class ProductDetailActivity extends AppCompatActivity {
         product = getIntent().getParcelableExtra("post");
         title = findViewById(R.id.tv_title);
         productQr = findViewById(R.id.product_image);
+        iv_qr = findViewById(R.id.iv_qr);
         description = findViewById(R.id.tv_description);
         recycleFeedback = findViewById(R.id.recycle_feedback);
         if (product != null) {
             title.setText(product.getName());
             description.setText(product.getDiscription());
             Picasso.with(getBaseContext())
-                    .load(product.getBarcode())
+                    .load(product.getProductImage())
                     .into(productQr);
+        }
+        try {
+            MultiFormatWriter writer = new MultiFormatWriter();
+            BitMatrix matrix = writer.encode(product.getProductId(),
+                    BarcodeFormat.QR_CODE, 256, 256);
+            BarcodeEncoder encoder = new BarcodeEncoder();
+            bitmap = encoder.createBitmap(matrix);
+            iv_qr.setImageBitmap(bitmap);
+        } catch (WriterException e) {
+            e.printStackTrace();
         }
 
 

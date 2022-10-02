@@ -33,7 +33,7 @@ import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 
-public class ProductList extends AppCompatActivity {
+public class ProductListActivity extends AppCompatActivity {
     RecyclerView recyclerView_product;
     RecyclerView.LayoutManager layoutManager;
     FloatingActionButton floatingActionButton;
@@ -76,7 +76,7 @@ public class ProductList extends AppCompatActivity {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(ProductList.this, AddProductWithQR.class));
+                startActivity(new Intent(ProductListActivity.this, AddProductWithQR.class));
                 finish();
             }
         });
@@ -93,16 +93,28 @@ public class ProductList extends AppCompatActivity {
             @Override
             protected void populateViewHolder(ProductViewHolder viewHolder, Product model, int position) {
                 viewHolder.product_name.setText(model.getName());
+                if (new Helper(ProductListActivity.this).getUser().getUsertype() == 1) {
+                    viewHolder.tvEdit.setVisibility(View.GONE);
+                }
                 Picasso.with(getBaseContext())
-                        .load(model.getBarcode())
+                        .load(model.getProductImage())
                         .into(viewHolder.product_image);
 
+                viewHolder.tvEdit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(ProductListActivity.this, AddProductWithQR.class);
+                        intent.putExtra("product", model);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
                 viewHolder.setItemClickListener(new ItemClickListener() {
                     @Override
                     public void onClick(View view, int position, boolean isLongClick) {
-                    Intent intent=new Intent(ProductList.this,ProductDetailActivity.class);
-                    intent.putExtra("post",model);
-                    startActivity(intent);
+                        Intent intent = new Intent(ProductListActivity.this, ProductDetailActivity.class);
+                        intent.putExtra("post", model);
+                        startActivity(intent);
                     }
 
                 });

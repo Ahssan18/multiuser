@@ -57,7 +57,7 @@ public class CustomerActivity extends AppCompatActivity implements View.OnClickL
                 startActivity(i);
                 break;
             case R.id.cart:
-                i = new Intent(this, OrdersActivity.class);
+                i = new Intent(this, PlaceOrdersActivity.class);
                 startActivity(i);
                 break;
             case R.id.Orders:
@@ -65,7 +65,7 @@ public class CustomerActivity extends AppCompatActivity implements View.OnClickL
                 startActivity(i);
                 break;
             case R.id.Products:
-                i = new Intent(this, ProductList.class);
+                i = new Intent(this, ProductListActivity.class);
                 startActivity(i);
                 break;
             case R.id.Settings:

@@ -1,10 +1,15 @@
 package com.food.multiuser.demo;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.MediaStore;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,11 +17,12 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.food.multiuser.Model.Product;
 import com.food.multiuser.R;
-import com.food.multiuser.activity.ProductList;
+import com.food.multiuser.activity.ProductListActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
@@ -24,146 +30,183 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.common.BitMatrix;
-import com.journeyapps.barcodescanner.BarcodeEncoder;
+import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 
 public class AddProductWithQR extends AppCompatActivity {
 
     Button btnGenerate, btnSaveProduct;
-    ImageView imageViewQR;
+    ImageView imageViewProduct, iv_picker;
     EditText editTitle, editDesc, editPrice, editQty;
-
     DatabaseReference reference, productReference;
-
     FirebaseStorage storage;
     StorageReference storageReference;
-
     private String strProductKey;
-
     ProgressDialog dialog;
-
-    //upload QR Code
     Bitmap bitmap;
     ByteArrayOutputStream baos;
-    byte [] data;
+    private Product product;
+    byte[] data;
+    boolean editImage = true;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product_with_qr);
-        setTitle("Add New Product");
-
-        //initialization
         dialog = new ProgressDialog(this);
         dialog.setCancelable(true);
-
         reference = FirebaseDatabase.getInstance().getReference();
-
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
-
-
         baos = new ByteArrayOutputStream();
-
         editDesc = findViewById(R.id.editDescription);
         editTitle = findViewById(R.id.editProduct);
         editQty = findViewById(R.id.editQty);
         editPrice = findViewById(R.id.editPrice);
-
-        imageViewQR = findViewById(R.id.imageViewQR);
-
-        btnGenerate = findViewById(R.id.buttonGenerate);
+        imageViewProduct = findViewById(R.id.imageViewQR);
+        iv_picker = findViewById(R.id.iv_picker);
         btnSaveProduct = findViewById(R.id.buttonSave);
-        btnSaveProduct.setEnabled(false);//disable button until qr generated
-
-        //apply click listener
-        btnGenerate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //get product push key
-                strProductKey = reference.push().getKey();
-
-                //generate qr
-
-                //initialize multi format writer
-                MultiFormatWriter writer = new MultiFormatWriter();
-                try{
-                    //initialize QR Matrix
-                    BitMatrix matrix = writer.encode(strProductKey,
-                            BarcodeFormat.QR_CODE, 256, 256);
-                    BarcodeEncoder encoder  = new BarcodeEncoder();
-
-                    //initialize QR Image
-                    bitmap = encoder.createBitmap(matrix);
-
-                    //replace generate button text
-                    btnGenerate.setText("Re-Generate QR");
-
-                    //set QR Image to ImageView
-                    imageViewQR.setImageBitmap(bitmap);
-
-
-                    //when qr generated: button enabled
-                    btnSaveProduct.setEnabled(true);
-
-                }catch (Exception ex){
-                    ex.getMessage();
-
+        if (getIntent().hasExtra("product")) {
+            product = getIntent().getParcelableExtra("product");
+            setTitle("Edit Product");
+            editTitle.setText(product.getName());
+            editDesc.setText(product.getDiscription());
+            editPrice.setText(String.valueOf(product.getPrice()));
+            editQty.setText(String.valueOf(product.getQuantity()));
+            Picasso.with(getBaseContext())
+                    .load(product.getProductImage())
+                    .into(imageViewProduct);
+            btnSaveProduct.setText("Update Product");
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    bitmap = ((BitmapDrawable) imageViewProduct.getDrawable()).getBitmap();
                 }
-
-
+            }, 2000);
+            editImage = false;
+        } else {
+            setTitle("Add New Product");
+        }
+        iv_picker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                picImage();
             }
         });
         btnSaveProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //read values
-                String title = editTitle.getText().toString();
-                String description = editDesc.getText().toString();
-                int qty = Integer.parseInt(editQty.getText().toString());
-                int price = Integer.parseInt(editPrice.getText().toString());
-                Product product = new Product();
-                product.setProductId(strProductKey);
-                product.setName(title);
-                product.setQuantity(qty);
-                product.setDiscription(description);
-                product.setPrice(price);
+                if (bitmap != null) {
+                    if (!editTitle.getText().toString().isEmpty()) {
+                        if (!editDesc.getText().toString().isEmpty()) {
+                            if (!editPrice.getText().toString().isEmpty()) {
+                                if (!editQty.getText().toString().isEmpty()) {
+                                    if (product != null && product.getProductId() != null) {
+                                        strProductKey = product.getProductId();
+                                    } else {
+                                        strProductKey = reference.push().getKey();
+                                    }
+                                    String title = editTitle.getText().toString();
+                                    String description = editDesc.getText().toString();
+                                    int qty = Integer.parseInt(editQty.getText().toString());
+                                    int price = Integer.parseInt(editPrice.getText().toString());
+                                    Product product = new Product();
+                                    product.setProductId(strProductKey);
+                                    product.setName(title);
+                                    product.setQuantity(qty);
+                                    product.setDiscription(description);
+                                    product.setPrice(price);
+                                    getImageFileFromImageView(product);
+                                } else {
+                                    Toast.makeText(AddProductWithQR.this, "Please add product quantity !", Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                Toast.makeText(AddProductWithQR.this, "Please enter product price !", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(AddProductWithQR.this, "Please add product description !", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(AddProductWithQR.this, "Please add product title !", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(AddProductWithQR.this, "Please select product image!", Toast.LENGTH_SHORT).show();
+                }
 
-                //get image and upload
-                getImageFileFromImageView(product);
             }
         });
 
     }
 
-    private void getImageFileFromImageView(Product product) {
+    private void picImage() {
+        LayoutInflater factory = LayoutInflater.from(this);
+        final View deleteDialogView = factory.inflate(R.layout.image_picker, null);
+        final AlertDialog deleteDialog = new AlertDialog.Builder(this).create();
+        deleteDialog.setView(deleteDialogView);
+        deleteDialogView.findViewById(R.id.tv_camera).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(takePicture, 0);
+                deleteDialog.dismiss();
+            }
+        });
+        deleteDialogView.findViewById(R.id.tv_galary).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(pickPhoto, 1);
+                deleteDialog.dismiss();
+            }
+        });
 
+        deleteDialog.show();
+    }
 
-        // Get the data from an ImageView as bytes
-        imageViewQR.setDrawingCacheEnabled(true);
-        imageViewQR.buildDrawingCache();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 0:
+            case 1:
+                if (resultCode == RESULT_OK) {
+                    assert data != null;
+                    Uri selectedImage = data.getData();
+                    imageViewProduct.setImageURI(selectedImage);
+                    bitmap = ((BitmapDrawable) imageViewProduct.getDrawable()).getBitmap();
+                    editImage = true;
+                }
+                break;
+        }
+    }
 
-        baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        data = baos.toByteArray();
-
-        //upload QR Image to firebase storage
-        uploadImage(data, product);
+    private void getImageFileFromImageView(Product product1) {
+        if (editImage) {
+            imageViewProduct.setDrawingCacheEnabled(true);
+            imageViewProduct.buildDrawingCache();
+            baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            data = baos.toByteArray();
+            uploadImage(data, product1);
+        } else {
+            product1.setProductImage(product.getProductImage());
+            saveProduct(product1);
+        }
 
     }
 
-    private void uploadImage(byte[] data, Product prod ) {
-        dialog.setTitle("Uploading QR...");
+    private void uploadImage(byte[] data, Product prod) {
+        if (product != null) {
+            dialog.setTitle("Adding product...");
+        } else {
+            dialog.setTitle("Updating product...");
+        }
         dialog.show();
-
         final StorageReference fileRef =
-                storageReference.child("barcodes/").child( prod.getProductId() +".jpeg");
-
+                storageReference.child("barcodes/").child(prod.getProductId() + ".jpeg");
         UploadTask uploadTask = fileRef.putBytes(data);
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -171,11 +214,7 @@ public class AddProductWithQR extends AppCompatActivity {
                 fileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
-                        //Uri object has Download URL of uploaded file
-                        //get save image's download URL.
-                        prod.setBarcode(uri.toString());
-
-                        //save QR Code's URL to customer profile
+                        prod.setProductImage(uri.toString());
                         saveProduct(prod);
                     }
                 });
@@ -198,10 +237,12 @@ public class AddProductWithQR extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void unused) {
                         dialog.dismiss();
-
-                        Toast.makeText(AddProductWithQR.this, "Product Added", Toast.LENGTH_SHORT).show();
-
-                        startActivity(new Intent(AddProductWithQR.this, ProductList.class));
+                        if (product != null) {
+                            Toast.makeText(AddProductWithQR.this, "Product edit successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(AddProductWithQR.this, "Product Added", Toast.LENGTH_SHORT).show();
+                        }
+                        startActivity(new Intent(AddProductWithQR.this, ProductListActivity.class));
                         finish();
                     }
                 }).addOnFailureListener(new OnFailureListener() {

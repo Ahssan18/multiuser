@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -34,7 +36,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrdersActivity extends AppCompatActivity implements View.OnClickListener {
+public class PlaceOrdersActivity extends AppCompatActivity implements View.OnClickListener {
 
     static RecyclerView recyclerview;
     LinearLayoutManager layoutManager;
@@ -42,7 +44,7 @@ public class OrdersActivity extends AppCompatActivity implements View.OnClickLis
     private List<Product> listCard;
     private AdapterPlaceOrder AdapterPlaceOrder;
     private FirebaseAuth auth;
-    private String TAG = "OrdersActivity";
+    private String TAG = "PlaceOrdersActivity";
     private Button btnPlaceOrder, btnAddProduct;
     private Helper helper;
     private TextView totalAmout;
@@ -81,6 +83,32 @@ public class OrdersActivity extends AppCompatActivity implements View.OnClickLis
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.cart_meni, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.clear_cart: {
+                clearCart();
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void clearCart() {
+        cartReference.child(helper.getUser().getUid()).setValue(null).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                listCard.clear();
+                AdapterPlaceOrder.notifyDataSetChanged();
+            }
+        });
+    }
+
     private void clickListener() {
         btnPlaceOrder.setOnClickListener(this);
         btnAddProduct.setOnClickListener(this);
@@ -98,11 +126,12 @@ public class OrdersActivity extends AppCompatActivity implements View.OnClickLis
         layoutManager = new LinearLayoutManager(this);
         listCard = new ArrayList<>();
         recyclerview = findViewById(R.id.recyclerview_order);
+        recyclerview.setLayoutManager(layoutManager);
+
     }
 
     private void setAdapter() {
         AdapterPlaceOrder = new AdapterPlaceOrder(this, listCard);
-        recyclerview.setLayoutManager(layoutManager);
         recyclerview.setAdapter(AdapterPlaceOrder);
     }
 
@@ -116,6 +145,7 @@ public class OrdersActivity extends AppCompatActivity implements View.OnClickLis
                 order.setDeliverStatus(false);
                 order.setAcceptStatus(false);
                 order.setProductList(listCard);
+                order.setTimeStamp(System.currentTimeMillis());
                 String key = orderRef.push().getKey();
                 order.setOrderId(key);
                 orderRef.child(key).setValue(order).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -127,7 +157,7 @@ public class OrdersActivity extends AppCompatActivity implements View.OnClickLis
                                 listCard.clear();
                                 AdapterPlaceOrder.notifyDataSetChanged();
                                 finish();
-                                Toast.makeText(OrdersActivity.this, "Order place successfully", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PlaceOrdersActivity.this, "Order place successfully", Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -137,6 +167,7 @@ public class OrdersActivity extends AppCompatActivity implements View.OnClickLis
 
         } else if (view == btnAddProduct) {
             startActivity(new Intent(this, ScanProduct.class));
+            finish();
         }
     }
 }

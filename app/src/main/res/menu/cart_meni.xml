@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/clear_cart"
+        android:icon="@drawable/ic_lock_open_blue_24dp"
+        android:orderInCategory="300"
+        android:title="Clear cart">
+
+    </item>
+</menu>

@@ -52,26 +52,18 @@ public class ScanProduct extends AppCompatActivity {
         setTitle("Scan Product Code");
         cartItem = new CartItem();
         productList = new ArrayList<>();
-        //initialization
         dialog = new ProgressDialog(this);
         dialog.setCancelable(true);
-
         PRODUCT_ID = "";
         product = new Product();
-
         reference = FirebaseDatabase.getInstance().getReference();
         auth = FirebaseAuth.getInstance();
-
         tvProduct = findViewById(R.id.textViewProduct);
         scanproductlayout = findViewById(R.id.scanproductlayout);
-
         btnScanQR = findViewById(R.id.btnScanQR);
-
-        //apply click listener
         btnScanQR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //call method to scan QR Code
                 scanQRCode();
             }
         });
@@ -102,25 +94,14 @@ public class ScanProduct extends AppCompatActivity {
     private void getProductDetails(String productID) {
         dialog.setTitle("loading product details");
         dialog.show();
-
-
-        //when need to get single record with some id: use SingleValueEvent() method
         reference.child("Products").child(productID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 dialog.dismiss();
-
                 if (snapshot.getKey() != null) {
-                    //fetch record
                     product = snapshot.getValue(Product.class);
-
-                    Log.d("TAG", "onDataChange: Product Record: \n" + product.toString());
-
                     tvProduct.setText(product.toString());
-
-                    //add product to cart after scan
                     addProductToCart(product);
-
                 } else {
                     Toast.makeText(ScanProduct.this, "No record found", Toast.LENGTH_SHORT).show();
                 }
