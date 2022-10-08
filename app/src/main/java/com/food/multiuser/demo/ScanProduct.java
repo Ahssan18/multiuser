@@ -1,6 +1,7 @@
 package com.food.multiuser.demo;
 
 import android.app.ProgressDialog;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -61,10 +63,29 @@ public class ScanProduct extends AppCompatActivity {
         tvProduct = findViewById(R.id.textViewProduct);
         scanproductlayout = findViewById(R.id.scanproductlayout);
         btnScanQR = findViewById(R.id.btnScanQR);
+//        getPreviousCartItems();
         btnScanQR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 scanQRCode();
+            }
+        });
+    }
+
+    private void getPreviousCartItems() {
+        reference.child("MyCart").child(auth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    cartItem = (snapshot.getValue(CartItem.class));
+                    productList.addAll(cartItem.getList());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
     }
@@ -100,8 +121,12 @@ public class ScanProduct extends AppCompatActivity {
                 dialog.dismiss();
                 if (snapshot.getKey() != null) {
                     product = snapshot.getValue(Product.class);
-                    tvProduct.setText(product.toString());
-                    addProductToCart(product);
+                    if (product.getQuantity() > 0) {
+                        tvProduct.setText(product.toString());
+                        addProductToCart(product);
+                    } else {
+                        Toast.makeText(ScanProduct.this, "Sorry this item is out of stock!", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     Toast.makeText(ScanProduct.this, "No record found", Toast.LENGTH_SHORT).show();
                 }
@@ -130,13 +155,14 @@ public class ScanProduct extends AppCompatActivity {
         if (found) {
             for (int i = 0; i < productList.size(); i++) {
                 Product product1 = productList.get(i);
-                if (product1.getProductId().equals(product.getProductId())) {
-                    int quanity = existingProduct.getQuantity() + 1;
-                    product1.setQuantity(quanity);
+                if (product1.getProductId().equals(existingProduct.getProductId())) {
+                    int quanity = existingProduct.getOrderQuantity() + 1;
+                    product1.setOrderQuantity(quanity);
                     productList.set(i, product1);
                 }
             }
         } else {
+            product.setOrderQuantity(1);
             productList.add(product);
         }
         for (int i = 0; i < productList.size(); i++) {

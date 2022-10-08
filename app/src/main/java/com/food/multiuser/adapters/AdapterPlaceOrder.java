@@ -41,7 +41,7 @@ public class AdapterPlaceOrder extends RecyclerView.Adapter<AdapterPlaceOrder.Ca
         holder.title.setText(cartItem.getName());
         holder.description.setText(cartItem.getDiscription());
         holder.perUnitPrice.setText("Unit Price :" + cartItem.getPrice());
-        holder.quantity.setText(cartItem.getQuantity() + "");
+        holder.quantity.setText(cartItem.getOrderQuantity() + "");
 
     }
 

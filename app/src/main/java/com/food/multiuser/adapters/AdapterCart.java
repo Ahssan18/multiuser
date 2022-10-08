@@ -53,7 +53,7 @@ public class AdapterCart extends RecyclerView.Adapter<AdapterCart.CartView> {
         holder.title.setText("Product Title : " + cartItem.getName());
         holder.description.setText("Product Details : " + cartItem.getDiscription());
         holder.perUnitPrice.setText("Unit Price : " + cartItem.getPrice());
-        holder.quantity.setText("Product Quantity : " + cartItem.getQuantity() + "");
+        holder.quantity.setText("Product Quantity : " + cartItem.getOrderQuantity() + "");
         if (order.getTimeStamp() != -1) {
             holder.tv_orderData.setText(helper.getDate(order.getTimeStamp()));
         }

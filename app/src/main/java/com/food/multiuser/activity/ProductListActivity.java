@@ -105,6 +105,7 @@ public class ProductListActivity extends AppCompatActivity {
                     public void onClick(View view) {
                         Intent intent = new Intent(ProductListActivity.this, AddProductWithQR.class);
                         intent.putExtra("product", model);
+                        intent.putExtra("edit", true);
                         startActivity(intent);
                         finish();
                     }

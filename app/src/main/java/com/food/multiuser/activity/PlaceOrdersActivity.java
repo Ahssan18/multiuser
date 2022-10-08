@@ -1,5 +1,8 @@
 package com.food.multiuser.activity;
 
+import static com.food.multiuser.activity.BakeryApplication.productsList;
+
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,7 +37,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PlaceOrdersActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -49,6 +54,7 @@ public class PlaceOrdersActivity extends AppCompatActivity implements View.OnCli
     private Helper helper;
     private TextView totalAmout;
     private CartItem cartItem;
+    private int position;
 
 
     @Override
@@ -67,7 +73,6 @@ public class PlaceOrdersActivity extends AppCompatActivity implements View.OnCli
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     cartItem = (snapshot.getValue(CartItem.class));
-                    Log.e(TAG, "CARTDATA" + cartItem.toString());
                     totalAmout.setText(cartItem.getTotalPrice() + "");
                     listCard.addAll(cartItem.getList());
                     setAdapter();
@@ -104,7 +109,8 @@ public class PlaceOrdersActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 listCard.clear();
-                AdapterPlaceOrder.notifyDataSetChanged();
+                if (AdapterPlaceOrder != null)
+                    AdapterPlaceOrder.notifyDataSetChanged();
             }
         });
     }
@@ -154,10 +160,38 @@ public class PlaceOrdersActivity extends AppCompatActivity implements View.OnCli
                         cartReference.child(helper.getUser().getUid()).setValue(null).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                listCard.clear();
-                                AdapterPlaceOrder.notifyDataSetChanged();
-                                finish();
-                                Toast.makeText(PlaceOrdersActivity.this, "Order place successfully", Toast.LENGTH_SHORT).show();
+                                position = 0;
+                                updateProductsQuantity(position);
+                            }
+
+                            @SuppressLint("NotifyDataSetChanged")
+                            private void updateProductsQuantity(int position) {
+                                Log.e(TAG, "productList " + productsList.size());
+                                if (position < listCard.size()) {
+                                    boolean found = false;
+                                    Product product = listCard.get(position);
+                                    int remainingQuantity = -1;
+                                    for (Product actualProduct : productsList) {
+                                        if (product.getProductId().equals(actualProduct.getProductId())) {
+                                            remainingQuantity = actualProduct.getQuantity() - product.getOrderQuantity();
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                    if (found && remainingQuantity != -1) {
+                                        Map<String, Object> map = new HashMap<>();
+                                        map.put("quantity", remainingQuantity);
+                                        reference.child("Products").child(product.getProductId()).updateChildren(map);
+                                        found = false;
+                                    }
+                                    position = position + 1;
+                                    updateProductsQuantity(position);
+                                } else {
+                                    Toast.makeText(PlaceOrdersActivity.this, "Order place successfully", Toast.LENGTH_SHORT).show();
+                                    listCard.clear();
+                                    AdapterPlaceOrder.notifyDataSetChanged();
+                                    finish();
+                                }
                             }
                         });
                     }

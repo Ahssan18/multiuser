@@ -4,11 +4,14 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +22,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.food.multiuser.Model.Product;
 import com.food.multiuser.R;
@@ -33,6 +37,7 @@ import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 
 public class AddProductWithQR extends AppCompatActivity {
 
@@ -48,8 +53,11 @@ public class AddProductWithQR extends AppCompatActivity {
     ByteArrayOutputStream baos;
     private Product product;
     byte[] data;
-    boolean editImage = true;
-
+    boolean editImage = false, editProduct = false;
+    public String APP_TAG = "MyCustomApp";
+    private final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
+    private final String photoFileName = "photo.jpg";
+    private File photoFile = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +78,7 @@ public class AddProductWithQR extends AppCompatActivity {
         btnSaveProduct = findViewById(R.id.buttonSave);
         if (getIntent().hasExtra("product")) {
             product = getIntent().getParcelableExtra("product");
+            editProduct = true;
             setTitle("Edit Product");
             editTitle.setText(product.getName());
             editDesc.setText(product.getDiscription());
@@ -82,7 +91,11 @@ public class AddProductWithQR extends AppCompatActivity {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    bitmap = ((BitmapDrawable) imageViewProduct.getDrawable()).getBitmap();
+                    try {
+                        bitmap = ((BitmapDrawable) imageViewProduct.getDrawable()).getBitmap();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }, 2000);
             editImage = false;
@@ -140,6 +153,16 @@ public class AddProductWithQR extends AppCompatActivity {
 
     }
 
+    public File getPhotoFileUri(String fileName) {
+        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), APP_TAG);
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
+            Log.d(APP_TAG, "failed to create directory");
+        }
+        File file = new File(mediaStorageDir.getPath() + File.separator + fileName);
+
+        return file;
+    }
+
     private void picImage() {
         LayoutInflater factory = LayoutInflater.from(this);
         final View deleteDialogView = factory.inflate(R.layout.image_picker, null);
@@ -149,19 +172,27 @@ public class AddProductWithQR extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(takePicture, 0);
-                deleteDialog.dismiss();
+                photoFile = getPhotoFileUri(photoFileName);
+                if (photoFile != null) {
+                    Uri fileProvider =
+                            FileProvider.getUriForFile(AddProductWithQR.this, "com.food.multiuser", photoFile);
+                    takePicture.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
+                    startActivityForResult(takePicture, 0);
+                    deleteDialog.dismiss();
+                }
             }
         });
-        deleteDialogView.findViewById(R.id.tv_galary).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto, 1);
-                deleteDialog.dismiss();
-            }
-        });
+        deleteDialogView.findViewById(R.id.tv_galary).
+
+                setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        startActivityForResult(pickPhoto, 1);
+                        deleteDialog.dismiss();
+                    }
+                });
 
         deleteDialog.show();
     }
@@ -171,35 +202,54 @@ public class AddProductWithQR extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case 0:
+                if (resultCode == RESULT_OK) {
+                    bitmap = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+                    imageViewProduct.setImageBitmap(bitmap);
+                    bitmap = ((BitmapDrawable) imageViewProduct.getDrawable()).getBitmap();
+                    if (product != null) {
+                        editImage = true;
+                    }
+                }
+                break;
             case 1:
                 if (resultCode == RESULT_OK) {
                     assert data != null;
                     Uri selectedImage = data.getData();
                     imageViewProduct.setImageURI(selectedImage);
                     bitmap = ((BitmapDrawable) imageViewProduct.getDrawable()).getBitmap();
-                    editImage = true;
+                    if (product != null) {
+                        editImage = true;
+                    }
                 }
                 break;
         }
     }
 
     private void getImageFileFromImageView(Product product1) {
-        if (editImage) {
-            imageViewProduct.setDrawingCacheEnabled(true);
-            imageViewProduct.buildDrawingCache();
-            baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            data = baos.toByteArray();
-            uploadImage(data, product1);
+        if (editProduct) {
+            if (editImage) {
+                UploadImageToStorage(product1);
+            } else {
+                product1.setProductImage(product.getProductImage());
+                saveProduct(product1);
+            }
         } else {
-            product1.setProductImage(product.getProductImage());
-            saveProduct(product1);
+            UploadImageToStorage(product1);
         }
 
     }
 
+    private void UploadImageToStorage(Product product1) {
+        imageViewProduct.setDrawingCacheEnabled(true);
+        imageViewProduct.buildDrawingCache();
+        baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        data = baos.toByteArray();
+        uploadImage(data, product1);
+    }
+
     private void uploadImage(byte[] data, Product prod) {
-        if (product != null) {
+        if (!editProduct) {
             dialog.setTitle("Adding product...");
         } else {
             dialog.setTitle("Updating product...");
@@ -224,9 +274,8 @@ public class AddProductWithQR extends AppCompatActivity {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure( Exception exception) {
-                // Handle unsuccessful uploads
                 dialog.dismiss();
-                Toast.makeText(AddProductWithQR.this, "QR Code Not Saved", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AddProductWithQR.this, "Failed to upload product Image", Toast.LENGTH_SHORT).show();
             }
         });
     }

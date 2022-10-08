@@ -5,18 +5,30 @@ import android.os.Parcelable;
 
 public class Product implements Parcelable {
     private String productId, Discription, Name, Image, MenuId, productImage;
-    private Integer Quantity = 0, Price = 0;
+    private Integer Quantity = 0;
+    private Integer Price = 0;
+
+    public Integer getOrderQuantity() {
+        return orderQuantity;
+    }
+
+    public void setOrderQuantity(Integer orderQuantity) {
+        this.orderQuantity = orderQuantity;
+    }
+
+    private Integer orderQuantity = 0;
     private boolean feedback = false;
 
     public Product() {
     }
 
-    public Product(String productId, String discription, String name, String image, int price, int quantity, String menuId, String barcode) {
+    public Product(int orderQuantity, String discription, String name, String image, int price, int quantity, String menuId, String barcode) {
         Name = name;
         Image = image;
         Discription = discription;
         Price = price;
         Quantity = quantity;
+        this.orderQuantity = orderQuantity;
         MenuId = menuId;
         productImage = barcode;
     }
@@ -29,6 +41,7 @@ public class Product implements Parcelable {
         Image = in.readString();
         Price = in.readInt();
         Quantity = in.readInt();
+        orderQuantity = in.readInt();
         MenuId = in.readString();
         productImage = in.readString();
         feedback = in.readByte() != 0;
@@ -138,6 +151,7 @@ public class Product implements Parcelable {
         parcel.writeString(Image);
         parcel.writeInt(Price);
         parcel.writeInt(Quantity);
+        parcel.writeInt(orderQuantity);
         parcel.writeString(MenuId);
         parcel.writeString(productImage);
         parcel.writeByte((byte) (feedback ? 1 : 0));
