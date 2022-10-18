@@ -99,6 +99,7 @@ public class PlaceOrdersActivity extends AppCompatActivity implements View.OnCli
         switch (item.getItemId()) {
             case R.id.clear_cart: {
                 clearCart();
+                totalAmout.setText("");
             }
         }
         return super.onOptionsItemSelected(item);

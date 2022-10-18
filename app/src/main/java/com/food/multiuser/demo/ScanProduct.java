@@ -63,7 +63,6 @@ public class ScanProduct extends AppCompatActivity {
         tvProduct = findViewById(R.id.textViewProduct);
         scanproductlayout = findViewById(R.id.scanproductlayout);
         btnScanQR = findViewById(R.id.btnScanQR);
-//        getPreviousCartItems();
         btnScanQR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,6 +72,7 @@ public class ScanProduct extends AppCompatActivity {
     }
 
     private void getPreviousCartItems() {
+        productList.clear();
         reference.child("MyCart").child(auth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
@@ -91,12 +91,12 @@ public class ScanProduct extends AppCompatActivity {
     }
 
     private void scanQRCode() {
+        getPreviousCartItems();
         ScanOptions options = new ScanOptions();
         options.setPrompt("Scan a QR Code");
         options.setBeepEnabled(true);
         options.setOrientationLocked(true);
         options.setCaptureActivity(CaptureAct.class);
-
         barcodeLauncher.launch(options);
     }
 
@@ -167,16 +167,18 @@ public class ScanProduct extends AppCompatActivity {
         }
         for (int i = 0; i < productList.size(); i++) {
             Product product1 = productList.get(i);
-            price = price + (product1.getPrice() * product1.getQuantity());
+            price = price + (product1.getPrice() * product1.getOrderQuantity());
         }
-        cartItem.setTotalPrice(price + "");
-        cartItem.setList(productList);
+        CartItem order = new CartItem();
+        order.setTotalPrice(price + "");
+        order.setList(productList);
         reference.child("MyCart").child(auth.getCurrentUser().getUid())
-                .setValue(cartItem)
+                .setValue(order)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
                         dialog.dismiss();
+                        productList.clear();
                         Toast.makeText(ScanProduct.this, "Product added to your cart!", Toast.LENGTH_SHORT).show();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
