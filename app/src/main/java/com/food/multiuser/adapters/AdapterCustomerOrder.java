@@ -179,7 +179,7 @@ public class AdapterCustomerOrder extends RecyclerView.Adapter<AdapterCustomerOr
         for (Product product : order.getProductList()) {
             canvas.drawText(product.getName(), 10, name, title);
             canvas.drawText(String.valueOf(product.getPrice()), 450, name, title);
-            canvas.drawText(String.valueOf(product.getQuantity()), 600, name, title);
+            canvas.drawText(String.valueOf(product.getOrderQuantity()), 600, name, title);
             name = name + 50;
         }
         canvas.drawText("-----------------------------------------------------------", 10, 1000, title);
