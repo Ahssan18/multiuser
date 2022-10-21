@@ -116,7 +116,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                             String uid = task.getResult().getUser().getUid();
                             final User user = new User( uid, name, email, 0);
-                            //important to retrive data and send data based on user email
+                            //important to retrieve data and send data based on user email
                             Log.e(TAG, "onComplete" + FirebaseDatabase.getInstance().getReference("Users"));
 
                             FirebaseDatabase.getInstance().getReference("Users").child(uid).child("UserDetails")

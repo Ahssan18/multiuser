@@ -79,6 +79,7 @@ public class CustomerActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void Logout() {
+        //logout user from firebase and remove session
         Helper helper = new Helper(this);
         helper.logout();
         firebaseAuth.signOut();

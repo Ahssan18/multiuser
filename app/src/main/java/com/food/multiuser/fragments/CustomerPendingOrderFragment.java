@@ -53,6 +53,7 @@ public class CustomerPendingOrderFragment extends Fragment {
     }
 
     private void setData() {
+        //show pending order that admin not accepted yet
         Query query = orderReference.orderByChild("acceptStatus").equalTo(false);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)

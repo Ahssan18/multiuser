@@ -106,6 +106,7 @@ public class PlaceOrdersActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void clearCart() {
+        //clear card if a user want to clear data from shopping cart
         cartReference.child(helper.getUser().getUid()).setValue(null).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -146,6 +147,8 @@ public class PlaceOrdersActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View view) {
         if (view == btnPlaceOrder) {
             if (cartItem != null) {
+                //after adding products to shopping cart and place order using place order button
+                //and when order place successfully clear data from cart
                 Order order = new Order();
                 order.setUserId(helper.getUser().getUid());
                 order.setTotalPrice(cartItem.getTotalPrice() + "");

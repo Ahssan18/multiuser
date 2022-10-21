@@ -100,6 +100,7 @@ public class AdapterCustomerOrder extends RecyclerView.Adapter<AdapterCustomerOr
         holder.btn_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //can order if custom want to cancel his order
                 orderRef.child(order.getOrderId()).setValue(null).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -156,6 +157,7 @@ public class AdapterCustomerOrder extends RecyclerView.Adapter<AdapterCustomerOr
     }
 
     private void generatePDF(Order order) {
+        //generate pdf receipt of received order and save in gallary
         PdfDocument pdfDocument = new PdfDocument();
         Paint paint = new Paint();
         Paint title = new Paint();

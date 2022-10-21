@@ -61,6 +61,7 @@ public class AdapterCart extends RecyclerView.Adapter<AdapterCart.CartView> {
         holder.btnFeedback.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //send data to feedback activity for feed back against a specific product
                 Intent intent = new Intent(context, FeedBackActivity.class);
                 intent.putExtra("productId", cartItem.getProductId());
                 intent.putExtra("name", cartItem.getName());

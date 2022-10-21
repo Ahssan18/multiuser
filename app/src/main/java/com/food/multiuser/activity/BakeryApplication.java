@@ -26,6 +26,7 @@ public class BakeryApplication extends Application {
         firebaseDatabase = FirebaseDatabase.getInstance();
         productRef = firebaseDatabase.getReference("Products");
         productsList = new ArrayList<>();
+        // get all products from filrebase and listen when a new product is added oe edited some one
         productRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {

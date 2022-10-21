@@ -54,6 +54,7 @@ public class CustomerReceivedOrderFragment extends Fragment {
     }
 
     private void setData() {
+        //get customer received order here
         Query query = orderReference.orderByChild("acceptStatus").equalTo(true);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)

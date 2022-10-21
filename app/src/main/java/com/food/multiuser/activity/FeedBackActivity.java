@@ -52,6 +52,7 @@ public class FeedBackActivity extends AppCompatActivity {
                 if (!message.equals("")) {
                     feedBack.setMessage(etMessage.getText().toString());
 
+                    //submit feedback against specific product of order
                     feedbackReference.child(productId).push().setValue(feedBack).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {

@@ -76,6 +76,7 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        //download product qr then use this qr for placing order
         if (item.getItemId() == R.id.download_qr) {
             try {
                 SaveImage(((BitmapDrawable) iv_qr.getDrawable()).getBitmap());
@@ -147,6 +148,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void getProdectFeedback() {
+        //get all feedback against some product
         feedbackRef.child(product.getProductId()).addValueEventListener(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override

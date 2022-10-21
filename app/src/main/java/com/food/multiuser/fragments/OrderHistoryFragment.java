@@ -54,6 +54,7 @@ public class OrderHistoryFragment extends Fragment {
     }
 
     private void setData() {
+        //get order which is accepted by admin and in process to delivery
         Query query = orderReference.orderByChild("acceptStatus").equalTo(true);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)

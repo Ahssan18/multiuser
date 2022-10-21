@@ -107,6 +107,7 @@ public class LoginActivity extends AppCompatActivity {
 
     public void validate(String userEmail, String userPassword) {
 
+        //authenticate user from firebase against email and password
         processDialog.setMessage("................Please Wait.............");
         processDialog.show();
 
