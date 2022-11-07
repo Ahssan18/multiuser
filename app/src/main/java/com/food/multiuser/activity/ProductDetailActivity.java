@@ -50,7 +50,7 @@ import java.util.function.Consumer;
 
 public class ProductDetailActivity extends AppCompatActivity {
 
-    private TextView title, description;
+    private TextView title, description, tvRating;
     private RecyclerView recycleFeedback;
     private Product product;
     private DatabaseReference feedbackRef;
@@ -161,6 +161,14 @@ public class ProductDetailActivity extends AppCompatActivity {
                                 feedBackList.add(dataSnapshot.getValue(FeedBack.class));
                             }
                         });
+                        float averageRating = 0;
+                        if (feedBackList != null && feedBackList.size() > 0) {
+                            for (FeedBack feedBack : feedBackList) {
+                                averageRating = averageRating + feedBack.getRating();
+                            }
+                            averageRating = averageRating / feedBackList.size();
+                            tvRating.setText(averageRating + "/" + 5);
+                        }
                     }
                 }
                 setAdapter();
@@ -171,6 +179,7 @@ public class ProductDetailActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
     private void setAdapter() {
@@ -188,6 +197,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         feedbackRef = FirebaseDatabase.getInstance().getReference("feedback");
         product = getIntent().getParcelableExtra("post");
         title = findViewById(R.id.tv_title);
+        tvRating = findViewById(R.id.tv_rating);
         productQr = findViewById(R.id.product_image);
         iv_qr = findViewById(R.id.iv_qr);
         description = findViewById(R.id.tv_description);
